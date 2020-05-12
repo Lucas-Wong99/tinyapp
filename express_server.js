@@ -54,7 +54,7 @@ app.post("/u/:shortURL", (req, res) => {
 //Edits the longURL into whatever is submitted through client form
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.longURL;
-  res.redirect(`/urls/${req.params.id}`);
+  res.redirect(`/urls`);
 });
 
 //Accepts get request and redirects user to value of the longURL
