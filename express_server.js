@@ -39,6 +39,12 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const { shortURL } = req.params;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
+})
+
 //Accepts get request and redirects user to value of the longURL
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
