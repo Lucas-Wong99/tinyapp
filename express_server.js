@@ -57,8 +57,8 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
+app.get("*", (req, res) => {
+  res.send("Nothing to see here");
 });
 
 app.listen(PORT, () => {
