@@ -45,9 +45,16 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/urls/:shortURL", (req, res) => {
+//Redirects client to shortURL page when button is clicked
+app.post("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   res.redirect(`/urls/${shortURL}`);
+});
+
+//Edits the longURL into whatever is submitted through client form
+app.post("/urls/:id", (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect(`/urls/${req.params.id}`);
 });
 
 //Accepts get request and redirects user to value of the longURL
