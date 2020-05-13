@@ -35,6 +35,11 @@ const users = {
     id: "user2RandomID", 
     email: "user2@example.com", 
     password: "dishwasher-funk"
+  },
+  "user3RandomID": {
+    id: "user3RandomID", 
+    email: "user3@example.com", 
+    password: "shake-shake"
   }
 }
 
@@ -47,13 +52,23 @@ const checkEmail = (emailId) => {
   return false;
 }
 
+const checkPassword = (emailID, passwordID) => {
+  for (const user in users) {
+    if (passwordID === users[user].password && emailID === users[user].email) {
+      return true;
+    }
+  }
+  return false;
+}
+
+//Registers a new email and password into the database and sets id as a userID cookie
 app.post("/register", (req, res) => {
   const userID = `user${generateRandomString()}`
   const { email, password } = req.body;
   if (email === '' || password === '') {
-    res.status(400).send(`This email or password is invalid: Status code 400`);
+    res.status(400).send("This email or password is invalid: Status code 400");
   } else if (checkEmail(email)) {
-    res.status(400).send(`A user has already registered with this email: Status code 400`);
+    res.status(400).send("A user has already registered with this email: Status code 400");
   } else {
     users[userID] = {
       id: userID,
@@ -74,16 +89,36 @@ app.get("/register", (req, res) => {
   res.render("urls_registration", templateVars);
 });
 
-//Creates new cookie when user submits their username
-app.post("/login", (req, res) => {
-  const name = req.body.username;
-  res.cookie("username", name);
-  res.redirect("/urls");
+app.get("/login", (req, res) => {
+  let templateVars = { 
+    user_id: users[req.cookies["user_id"]]
+   };
+  res.render("urls_login", templateVars);
 })
 
-//Deletes the username cookie when user clicks Logout
+//Logs in to an existing user 
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  if (checkEmail(email)) {
+    if (checkPassword(email, password)) {
+      let userID = ''
+      for (const user in users) {
+        if (users[user].email === email) {
+          userID = users[user].id;
+        }
+      }
+      res.cookie("user_id", userID);
+      res.redirect("/urls");
+    } else {
+      res.status(403).send("This email or password is invalid: Status code 403");
+    }  
+  } else {
+    res.status(400).send("This email or password is invalid: Status code 403");
+  }
+});
+
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 })
 
