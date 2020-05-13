@@ -53,7 +53,7 @@ app.post("/register", (req, res) => {
 //Renders the registration page
 app.get("/register", (req, res) => {
   let templateVars = { 
-    users
+    user_id: users[req.cookies["user_id"]]
    };
   res.render("urls_registration", templateVars);
 });
@@ -98,7 +98,7 @@ app.post("/urls/:id", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = { 
-    users
+    user_id: users[req.cookies["user_id"]]
    };
   res.render("urls_new", templateVars);
 });
@@ -114,7 +114,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { 
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    users,
+    user_id: users[req.cookies["user_id"]],
   };
   res.render("urls_show", templateVars);
 });
@@ -122,7 +122,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = { 
     urls: urlDatabase,
-    users,
+    user_id: users[req.cookies["user_id"]]
    };
   res.render("urls_index", templateVars);
 });
