@@ -51,11 +51,9 @@ app.post("/register", (req, res) => {
   const userID = `user${generateRandomString()}`
   const { email, password } = req.body;
   if (email === '' || password === '') {
-    res.statusCode = 400;
-    res.send(`This email or password is invalid: Status code 400`);
+    res.status(400).send(`This email or password is invalid: Status code 400`);
   } else if (checkEmail(email)) {
-    res.statusCode = 400;
-    res.send(`A user has already registered with this email: Status code 400`);
+    res.status(400).send(`A user has already registered with this email: Status code 400`);
   } else {
     users[userID] = {
       id: userID,
