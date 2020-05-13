@@ -25,6 +25,13 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.get("/register", (req, res) => {
+  let templateVars = { 
+    username: req.cookies["username"]
+   };
+  res.render("urls_registration", templateVars);
+});
+
 //Creates new cookie when user submits their username
 app.post("/login", (req, res) => {
   const name = req.body.username;
