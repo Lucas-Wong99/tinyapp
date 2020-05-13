@@ -47,6 +47,11 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 })
 
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+})
+
 //Assigns a new key value pair to urlDatabase and redirects client
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
