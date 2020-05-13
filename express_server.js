@@ -24,29 +24,15 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-  
 
-app.get("/urls", (req, res) => {
-  let templateVars = { 
-    urls: urlDatabase,
-    username: req.cookies["username"]
-   };
-  res.render("urls_index", templateVars);
-});
-
-app.get("/urls/new", (req, res) => {
-  let templateVars = { 
-    username: req.cookies["username"]
-   };
-  res.render("urls_new", templateVars);
-});
-
+//Creates new cookie when user submits their username
 app.post("/login", (req, res) => {
   const name = req.body.username;
   res.cookie("username", name);
   res.redirect("/urls");
 })
 
+//Deletes the username cookie when user clicks Logout
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
@@ -77,6 +63,13 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls`);
 });
 
+app.get("/urls/new", (req, res) => {
+  let templateVars = { 
+    username: req.cookies["username"]
+   };
+  res.render("urls_new", templateVars);
+});
+
 //Accepts get request and redirects user to value of the longURL
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
@@ -91,6 +84,14 @@ app.get("/urls/:shortURL", (req, res) => {
     username: req.cookies["username"],
   };
   res.render("urls_show", templateVars);
+});
+
+app.get("/urls", (req, res) => {
+  let templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"]
+   };
+  res.render("urls_index", templateVars);
 });
 
 app.get("*", (req, res) => {
