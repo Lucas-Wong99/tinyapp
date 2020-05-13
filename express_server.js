@@ -38,16 +38,34 @@ const users = {
   }
 }
 
+const checkEmail = (emailId) => {
+  for (const user in users) {
+    if (emailId === users[user].email) {
+      return true;
+    }
+  }
+  return false;
+}
+
 app.post("/register", (req, res) => {
   const userID = `user${generateRandomString()}`
   const { email, password } = req.body;
-  users[userID] = {
-    id: userID,
-    email: email,
-    password: password
+  if (email === '' || password === '') {
+    res.statusCode = 400;
+    res.send(`This email or password is invalid: Status code 400`);
+  } else if (checkEmail(email)) {
+    res.statusCode = 400;
+    res.send(`A user has already registered with this email: Status code 400`);
+  } else {
+    users[userID] = {
+      id: userID,
+      email: email,
+      password: password
+    }
+    res.cookie('user_id', userID);
+    res.redirect("/urls");
+    console.log(users);
   }
-  res.cookie('user_id', userID);
-  res.redirect("/urls");
 });
 
 //Renders the registration page
