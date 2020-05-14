@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
+const { getUserByEmail } = require('./helpers')
 
 const PORT = 8080; // default port 8080
 const app = express();
@@ -29,15 +30,6 @@ const generateRandomString = () => {
   }
   return result;
 };
-
-const checkEmail = (emailId) => {
-  for (const user in users) {
-    if (emailId === users[user].email) {
-      return true;
-    }
-  }
-  return false;
-}
 
 const urlsForUser = function(id) {
   let results = {};
@@ -117,7 +109,7 @@ app.get("*", (req, res) => {
 //Logs in to an existing user 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  if (checkEmail(email)) { 
+  if (getUserByEmail(email, users)) { 
     for (const user in users) {
       if (bcrypt.compareSync(password, users[user].hashedPassword)) {
         req.session.user_id = users[user].id
@@ -136,7 +128,7 @@ app.post("/register", (req, res) => {
   const { email, password } = req.body;
   if (email === '' || password === '') {
     res.status(400).send("This email or password is invalid: Status code 400");
-  } else if (checkEmail(email)) {
+  } else if (getUserByEmail(email)) {
     res.status(400).send("A user has already registered with this email: Status code 400");
   } else {
     users[userID] = {
