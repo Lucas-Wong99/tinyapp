@@ -25,21 +25,21 @@ const urlDatabase = {
 };
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  },
-  "user3RandomID": {
-    id: "user3RandomID", 
-    email: "user3@example.com", 
-    password: "shake-shake"
-  }
+//   "userRandomID": {
+//     id: "userRandomID", 
+//     email: "user@example.com", 
+//     password: "purple-monkey-dinosaur"
+//   },
+//  "user2RandomID": {
+//     id: "user2RandomID", 
+//     email: "user2@example.com", 
+//     password: "dishwasher-funk"
+//   },
+//   "user3RandomID": {
+//     id: "user3RandomID", 
+//     email: "user3@example.com", 
+//     password: "shake-shake"
+//   }
 }
 
 const generateRandomString = () => {
@@ -61,14 +61,14 @@ const checkEmail = (emailId) => {
   return false;
 }
 
-const checkPassword = (emailID, passwordID) => {
-  for (const user in users) {
-    if (passwordID === users[user].password && emailID === users[user].email) {
-      return true;
-    }
-  }
-  return false;
-}
+// const checkPassword = (emailID, passwordID) => {
+//   for (const user in users) {
+//     if (passwordID === users[user].password && emailID === users[user].email) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }
 
 const urlsForUser = function(id) {
   let results = {};
@@ -148,21 +148,16 @@ app.get("*", (req, res) => {
 //Logs in to an existing user 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  if (checkEmail(email)) {
-    if (checkPassword(email, password)) {
-      let userID = ''
-      for (const user in users) {
-        if (users[user].email === email) {
-          userID = users[user].id;
-        }
+  if (checkEmail(email)) { 
+    for (const user in users) {
+      if (bcrypt.compareSync(password, users[user].hashedPassword)) {
+        res.cookie("user_id", users[user].id);
+        res.redirect("/urls");
       }
-      res.cookie("user_id", userID);
-      res.redirect("/urls");
-    } else {
-      res.status(403).send("This email or password is invalid: Status code 403");
-    }  
+    }
+    res.status(403).send("This password is invalid: Status code 403");
   } else {
-    res.status(400).send("This email or password is invalid: Status code 403");
+    res.status(400).send("This email is invalid: Status code 403");
   }
 });
 
@@ -178,11 +173,12 @@ app.post("/register", (req, res) => {
     users[userID] = {
       id: userID,
       email: email,
-      password: password
+      hashedPassword: bcrypt.hashSync(password, 10)
     }
     res.cookie('user_id', userID);
     res.redirect("/urls");
   }
+  console.log(users)
 });
 
 app.post("/logout", (req, res) => {
