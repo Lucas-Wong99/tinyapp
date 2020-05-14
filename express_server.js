@@ -42,7 +42,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   if (userID === undefined || userID !== urlDatabase[req.params.shortURL].user_id) {
-    res.send("Error, user must login")
+    res.send('Error, user must login <a href"/login">LOGIN</a>')
   } else {
     let templateVars = { 
       shortURL: req.params.shortURL,
@@ -55,31 +55,40 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //Renders the registration page
 app.get("/register", (req, res) => { 
-  //const userID = req.session.user_id; //&***********
-  // if (!userID) {
+  const userID = req.session.user_id; //&***********
+   if (!userID) {
     let templateVars = { 
       user_id: users[req.session.user_id]
       };
     res.render("urls_registration", templateVars);
-  // } else {
-  //   res.redirect("/urls");
-  // }
+   } else {
+     res.redirect("/urls");
+  }
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = { 
-    user_id: users[req.session.user_id]
-   };
-  res.render("urls_login", templateVars);
+  const userID = req.session.user_id;
+  if (userID) {
+    res.redirect("/urls")
+  } else {
+    let templateVars = { 
+      user_id: users[req.session.user_id]
+     };
+    res.render("urls_login", templateVars);
+  }
 });
 
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
-  let templateVars = { 
-    urls: urlsForUser(userID, urlDatabase),
-    user_id: users[req.session.user_id]
-   };
-  res.render("urls_index", templateVars);
+  if (!userID) {
+    res.send('User must be logged in to this site <a href="/login"> LOGIN </a>')
+  } else {
+    let templateVars = { 
+      urls: urlsForUser(userID, urlDatabase),
+      user_id: users[req.session.user_id]
+     };
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("*", (req, res) => {
@@ -113,7 +122,7 @@ app.post("/register", (req, res) => {
   const { email, password } = req.body;
   const user = getUserByEmail(email, users);
   if (email === '' || password === '') {
-    res.status(400).send("This email or password is invalid: Status code 400");
+    res.status(400).send("Invalid entry: Status code 400");
   } else if (user !== undefined) {
     res.status(400).send("A user has already registered with this email: Status code 400");
   } else {
@@ -136,12 +145,17 @@ app.post("/logout", (req, res) => {
 //Assigns a new key value pair to urlDatabase and redirects client
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
-  urlDatabase[randomString] = {
-    longURL: req.body.longURL,
-     user_id: req.session.user_id
-    };
-    console.log(urlDatabase);
-  res.redirect(`/urls/${randomString}`);
+  const userID = req.session.user_id;
+  if (!userID) {
+    res.status(401).send("User must be logged in to perform this action")
+  } else {
+    urlDatabase[randomString] = {
+      longURL: req.body.longURL,
+       user_id: req.session.user_id
+      };
+      console.log(urlDatabase);
+    res.redirect(`/urls/${randomString}`);
+  }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
