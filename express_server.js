@@ -1,24 +1,14 @@
 const express = require("express");
-const app = express();
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+
 const PORT = 8080; // default port 8080
+const app = express();
 
 app.set("view engine", "ejs");
 
-const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-
-const cookieParser = require("cookie-parser");
 app.use(cookieParser());
-
-const generateRandomString = () => {
-  let result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-};
 
 const urlDatabase = {
   "b2xVn2": {
@@ -49,6 +39,16 @@ const users = {
   }
 }
 
+const generateRandomString = () => {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
 const checkEmail = (emailId) => {
   for (const user in users) {
     if (emailId === users[user].email) {
@@ -76,100 +76,6 @@ const urlsForUser = function(id) {
   }
   return results;
 }
-
-//Registers a new email and password into the database and sets id as a userID cookie
-app.post("/register", (req, res) => {
-  const userID = `user${generateRandomString()}`
-  const { email, password } = req.body;
-  if (email === '' || password === '') {
-    res.status(400).send("This email or password is invalid: Status code 400");
-  } else if (checkEmail(email)) {
-    res.status(400).send("A user has already registered with this email: Status code 400");
-  } else {
-    users[userID] = {
-      id: userID,
-      email: email,
-      password: password
-    }
-    res.cookie('user_id', userID);
-    res.redirect("/urls");
-  }
-});
-
-//Renders the registration page
-app.get("/register", (req, res) => { 
-  let templateVars = { 
-    user_id: users[req.cookies["user_id"]]
-    };
-  res.render("urls_registration", templateVars);
-});
-
-app.get("/login", (req, res) => {
-  let templateVars = { 
-    user_id: users[req.cookies["user_id"]]
-   };
-  res.render("urls_login", templateVars);
-});
-
-//Logs in to an existing user 
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-  if (checkEmail(email)) {
-    if (checkPassword(email, password)) {
-      let userID = ''
-      for (const user in users) {
-        if (users[user].email === email) {
-          userID = users[user].id;
-        }
-      }
-      res.cookie("user_id", userID);
-      res.redirect("/urls");
-    } else {
-      res.status(403).send("This email or password is invalid: Status code 403");
-    }  
-  } else {
-    res.status(400).send("This email or password is invalid: Status code 403");
-  }
-});
-
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
-  res.redirect("/urls");
-});
-
-//Assigns a new key value pair to urlDatabase and redirects client
-app.post("/urls", (req, res) => {
-  const randomString = generateRandomString();
-  urlDatabase[randomString] = {
-    longURL: req.body.longURL,
-     user_id: req.cookies["user_id"]
-    };
-  res.redirect(`/urls/${randomString}`);
-});
-
-app.post("/urls/:shortURL/delete", (req, res) => {
-  const { shortURL } = req.params;
-  const userID = req.cookies.user_id;
-  if (userID) {
-    delete urlDatabase[shortURL];
-    res.redirect("/urls");
-  }
-});
-
-//Redirects client to shortURL page when button is clicked
-app.post("/u/:shortURL", (req, res) => {
-  const { shortURL } = req.params;
-  res.redirect(`/urls/${shortURL}`);
-});
-
-//Edits the longURL into whatever is submitted through client form
-app.post("/urls/:id", (req, res) => {
-  const userID = req.cookies.user_id;
-  if (userID) {
-    urlDatabase[req.params.id].longURL = req.body.longURL;
-    res.redirect(`/urls`);
-  }
-});
 
 app.get("/urls/new", (req, res) => {
   let templateVars = { 
@@ -203,6 +109,21 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
+//Renders the registration page
+app.get("/register", (req, res) => { 
+  let templateVars = { 
+    user_id: users[req.cookies["user_id"]]
+    };
+  res.render("urls_registration", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  let templateVars = { 
+    user_id: users[req.cookies["user_id"]]
+   };
+  res.render("urls_login", templateVars);
+});
+
 app.get("/urls", (req, res) => {
   const userID = req.cookies.user_id;
   let templateVars = { 
@@ -212,12 +133,95 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.get("/", (req, res) => {
+app.get("*", (req, res) => {
   const userID = req.cookies.user_id;
   if (userID) {
     res.redirect("/urls");
   } else {
     res.redirect("/login");
+  }
+});
+
+//Logs in to an existing user 
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  if (checkEmail(email)) {
+    if (checkPassword(email, password)) {
+      let userID = ''
+      for (const user in users) {
+        if (users[user].email === email) {
+          userID = users[user].id;
+        }
+      }
+      res.cookie("user_id", userID);
+      res.redirect("/urls");
+    } else {
+      res.status(403).send("This email or password is invalid: Status code 403");
+    }  
+  } else {
+    res.status(400).send("This email or password is invalid: Status code 403");
+  }
+});
+
+//Registers a new email and password into the database and sets id as a userID cookie
+app.post("/register", (req, res) => {
+  const userID = `user${generateRandomString()}`
+  const { email, password } = req.body;
+  if (email === '' || password === '') {
+    res.status(400).send("This email or password is invalid: Status code 400");
+  } else if (checkEmail(email)) {
+    res.status(400).send("A user has already registered with this email: Status code 400");
+  } else {
+    users[userID] = {
+      id: userID,
+      email: email,
+      password: password
+    }
+    res.cookie('user_id', userID);
+    res.redirect("/urls");
+  }
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/urls");
+});
+
+//Assigns a new key value pair to urlDatabase and redirects client
+app.post("/urls", (req, res) => {
+  const randomString = generateRandomString();
+  urlDatabase[randomString] = {
+    longURL: req.body.longURL,
+     user_id: req.cookies["user_id"]
+    };
+  res.redirect(`/urls/${randomString}`);
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const { shortURL } = req.params;
+  const userID = req.cookies.user_id;
+  if (userID) {
+    delete urlDatabase[shortURL];
+    res.redirect("/urls");
+  } else {
+    res.status(401).send("User is not authorized to perform this action");
+  }
+});
+
+//Redirects client to shortURL page when button is clicked
+app.post("/u/:shortURL", (req, res) => {
+  const { shortURL } = req.params;
+  res.redirect(`/urls/${shortURL}`);
+});
+
+//Edits the longURL into whatever is submitted through client form
+app.post("/urls/:id", (req, res) => {
+  const userID = req.cookies.user_id;
+  if (userID) {
+    urlDatabase[req.params.id].longURL = req.body.longURL;
+    res.redirect("/urls");
+  } else if (userID && urlDatabase[req.params.id].user_id !== userID) {
+
   }
 });
 
