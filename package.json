@@ -19,10 +19,12 @@
   },
   "homepage": "https://github.com/Lucas-Wong99/tinyapp#readme",
   "dependencies": {
+    "bcrypt": "2.0.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
     "ejs": "^3.1.2",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.3"
