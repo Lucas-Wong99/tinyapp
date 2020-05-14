@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
-const { getUserByEmail } = require('./helpers')
+const { getUserByEmail, urlsForUser, generateRandomString } = require('./helpers');
 
 const PORT = 8080; // default port 8080
 const app = express();
@@ -20,26 +20,6 @@ app.use(morgan("dev"));
 const urlDatabase = {};
 
 const users = {}
-
-const generateRandomString = () => {
-  let result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-};
-
-const urlsForUser = function(id) {
-  let results = {};
-  for (const url in urlDatabase) {
-    if (id === urlDatabase[url].user_id) {
-      results[url] = urlDatabase[url];
-    }   
-  }
-  return results;
-}
 
 app.get("/urls/new", (req, res) => {
   let templateVars = { 
@@ -91,7 +71,7 @@ app.get("/login", (req, res) => {
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
   let templateVars = { 
-    urls: urlsForUser(userID),
+    urls: urlsForUser(userID, urlDatabase),
     user_id: users[req.session.user_id]
    };
   res.render("urls_index", templateVars);
@@ -155,6 +135,7 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
      user_id: req.session.user_id
     };
+    console.log(urlDatabase);
   res.redirect(`/urls/${randomString}`);
 });
 
