@@ -55,10 +55,15 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //Renders the registration page
 app.get("/register", (req, res) => { 
-  let templateVars = { 
-    user_id: users[req.session.user_id]
-    };
-  res.render("urls_registration", templateVars);
+  //const userID = req.session.user_id; //&***********
+  // if (!userID) {
+    let templateVars = { 
+      user_id: users[req.session.user_id]
+      };
+    res.render("urls_registration", templateVars);
+  // } else {
+  //   res.redirect("/urls");
+  // }
 });
 
 app.get("/login", (req, res) => {
@@ -142,15 +147,17 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const { shortURL } = req.params;
   const userID = req.session.user_id;
-  if (userID) {
+  if (!userID) {
+    res.status(401).send("User is not authorized to perform this action");
+  } else if (userID && urlDatabase[shortURL].user_id !== userID) {
+    res.status(401).send("User is not authorized to delete other URLs");
+  } else {
     delete urlDatabase[shortURL];
     res.redirect("/urls");
-  } else {
-    res.status(401).send("User is not authorized to perform this action");
   }
 });
 
-//Redirects client to shortURL page when button is clicked
+//This is the edit button route that redirects the client to the shortURL HTML
 app.post("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   res.redirect(`/urls/${shortURL}`);
@@ -159,11 +166,13 @@ app.post("/u/:shortURL", (req, res) => {
 //Edits the longURL into whatever is submitted through client form
 app.post("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
-  if (userID) {
+  if (!userID) {
+    res.status(401).send("User must be logged in to see URLs");
+  } else if (userID && urlDatabase[req.params.id].user_id !== userID) {
+    res.status(401).send("User is not authorized to view other user URLs");
+  } else {
     urlDatabase[req.params.id].longURL = req.body.longURL;
     res.redirect("/urls");
-  } else if (userID && urlDatabase[req.params.id].user_id !== userID) {
-
   }
 });
 
