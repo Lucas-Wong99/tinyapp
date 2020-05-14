@@ -74,6 +74,7 @@ const urlsForUser = function(id) {
       results[url] = urlDatabase[url];
     }   
   }
+  return results;
 }
 
 //Registers a new email and password into the database and sets id as a userID cookie
@@ -109,7 +110,7 @@ app.get("/login", (req, res) => {
     user_id: users[req.cookies["user_id"]]
    };
   res.render("urls_login", templateVars);
-})
+});
 
 //Logs in to an existing user 
 app.post("/login", (req, res) => {
@@ -135,16 +136,16 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
-})
+});
 
 //Assigns a new key value pair to urlDatabase and redirects client
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
   urlDatabase[randomString] = {
     longURL: req.body.longURL,
-     url_id: req.cookies["user_id"]
+     user_id: req.cookies["user_id"]
     };
-    console.log(urlDatabase);
+    console.log(urlDatabase)
   res.redirect(`/urls/${randomString}`);
 });
 
@@ -185,6 +186,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //Handles get request and renders HTML with templateVars
 app.get("/urls/:shortURL", (req, res) => {
+  const userID = req.cookies.user_id;
   let templateVars = { 
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
@@ -194,21 +196,22 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const userID = req.cookies.user_id;
   let templateVars = { 
-    urls: urlDatabase,
+    urls: urlsForUser(userID),
     user_id: users[req.cookies["user_id"]]
    };
   res.render("urls_index", templateVars);
 });
 
-app.get("/", (req, res) => {
-  // if (req.cookie["user_id"]) {
-  //   res.redirect("/urls");
-  // } else {
-  //   res.redirect("/login");
-  // }
-  res.send("Nothing here mate");
-});
+// app.get("/", (req, res) => {
+//   const userID = req.cookies.user_id;
+//   // if (userID) {
+//   //   res.redirect("/urls");
+//   // } else {
+//   //   res.redirect("/login");
+//   // }
+// });urlsForUser(userID)
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
