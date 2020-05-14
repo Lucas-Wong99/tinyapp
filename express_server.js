@@ -149,8 +149,11 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const { shortURL } = req.params;
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
+  const userID = req.cookies.user_id;
+  if (userID) {
+    delete urlDatabase[shortURL];
+    res.redirect("/urls");
+  }
 });
 
 //Redirects client to shortURL page when button is clicked
@@ -161,8 +164,11 @@ app.post("/u/:shortURL", (req, res) => {
 
 //Edits the longURL into whatever is submitted through client form
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id].longURL = req.body.longURL;
-  res.redirect(`/urls`);
+  const userID = req.cookies.user_id;
+  if (userID) {
+    urlDatabase[req.params.id].longURL = req.body.longURL;
+    res.redirect(`/urls`);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
