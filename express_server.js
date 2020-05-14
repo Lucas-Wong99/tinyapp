@@ -109,14 +109,14 @@ app.get("*", (req, res) => {
 //Logs in to an existing user 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  if (getUserByEmail(email, users)) { 
-    for (const user in users) {
-      if (bcrypt.compareSync(password, users[user].hashedPassword)) {
-        req.session.user_id = users[user].id
-        res.redirect("/urls");
-      }
+  const user = getUserByEmail(email, users)
+  if (user !== undefined) { 
+    if (bcrypt.compareSync(password, users[user].hashedPassword)) {
+      req.session.user_id = users[user].id
+      res.redirect("/urls");
+    } else {
+      res.status(403).send("This password is invalid: Status code 403");
     }
-    res.status(403).send("This password is invalid: Status code 403");
   } else {
     res.status(400).send("This email is invalid: Status code 403");
   }
@@ -126,9 +126,10 @@ app.post("/login", (req, res) => {
 app.post("/register", (req, res) => {
   const userID = `user${generateRandomString()}`
   const { email, password } = req.body;
+  const user = getUserByEmail(email, users);
   if (email === '' || password === '') {
     res.status(400).send("This email or password is invalid: Status code 400");
-  } else if (getUserByEmail(email)) {
+  } else if (user !== undefined) {
     res.status(400).send("A user has already registered with this email: Status code 400");
   } else {
     users[userID] = {

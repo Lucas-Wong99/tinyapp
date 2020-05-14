@@ -1,10 +1,11 @@
 const getUserByEmail = (emailId, data) => {
   for (const user in data) {
     if (emailId === data[user].email) {
-      return true;
+      console.log(data[user])
+      return user;
     }
   }
-  return false;
+  return undefined;
 }
 
 module.exports = {
