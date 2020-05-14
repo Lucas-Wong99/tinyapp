@@ -97,10 +97,10 @@ app.post("/register", (req, res) => {
 });
 
 //Renders the registration page
-app.get("/register", (req, res) => {
+app.get("/register", (req, res) => { 
   let templateVars = { 
     user_id: users[req.cookies["user_id"]]
-   };
+    };
   res.render("urls_registration", templateVars);
 });
 
@@ -212,14 +212,14 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// app.get("/", (req, res) => {
-//   const userID = req.cookies.user_id;
-//   // if (userID) {
-//   //   res.redirect("/urls");
-//   // } else {
-//   //   res.redirect("/login");
-//   // }
-// });urlsForUser(userID)
+app.get("/", (req, res) => {
+  const userID = req.cookies.user_id;
+  if (userID) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
