@@ -151,7 +151,11 @@ app.get("/urls/new", (req, res) => {
   let templateVars = { 
     user_id: users[req.cookies["user_id"]]
    };
-  res.render("urls_new", templateVars);
+   if (templateVars.user_id === undefined) {
+     res.redirect("/login");
+   } else {
+    res.render("urls_new", templateVars);
+   }
 });
 
 //Accepts get request and redirects user to value of the longURL
