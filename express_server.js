@@ -21,8 +21,14 @@ const generateRandomString = () => {
 };
 
 const urlDatabase = {
-  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", user_id: "user3RandomID"},
-  "9sm5xK": {longURL: "http://www.google.com", user_id: "user3RandomID"}
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    user_id: "user3RandomID"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+     user_id: "user3RandomID"
+    }
 };
 
 const users = {
@@ -59,6 +65,15 @@ const checkPassword = (emailID, passwordID) => {
     }
   }
   return false;
+}
+
+const urlsForUser = function(id) {
+  let results = {};
+  for (const url in urlDatabase) {
+    if (id === urlDatabase[url].user_id) {
+      results[url] = urlDatabase[url];
+    }   
+  }
 }
 
 //Registers a new email and password into the database and sets id as a userID cookie
@@ -129,6 +144,7 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
      url_id: req.cookies["user_id"]
     };
+    console.log(urlDatabase);
   res.redirect(`/urls/${randomString}`);
 });
 
