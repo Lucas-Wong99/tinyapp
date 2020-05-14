@@ -21,8 +21,8 @@ const generateRandomString = () => {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", user_id: "user3RandomID"},
+  "9sm5xK": {longURL: "http://www.google.com", user_id: "user3RandomID"}
 };
 
 const users = {
@@ -125,7 +125,10 @@ app.post("/logout", (req, res) => {
 //Assigns a new key value pair to urlDatabase and redirects client
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
-  urlDatabase[randomString] = req.body.longURL;
+  urlDatabase[randomString] = {
+    longURL: req.body.longURL,
+     url_id: req.cookies["user_id"]
+    };
   res.redirect(`/urls/${randomString}`);
 });
 
@@ -143,7 +146,7 @@ app.post("/u/:shortURL", (req, res) => {
 
 //Edits the longURL into whatever is submitted through client form
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect(`/urls`);
 });
 
@@ -160,7 +163,7 @@ app.get("/urls/new", (req, res) => {
 
 //Accepts get request and redirects user to value of the longURL
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -168,7 +171,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { 
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user_id: users[req.cookies["user_id"]],
   };
   res.render("urls_show", templateVars);
@@ -182,8 +185,13 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.get("*", (req, res) => {
-  res.send("Nothing to see here");
+app.get("/", (req, res) => {
+  // if (req.cookie["user_id"]) {
+  //   res.redirect("/urls");
+  // } else {
+  //   res.redirect("/login");
+  // }
+  res.send("Nothing here mate");
 });
 
 app.listen(PORT, () => {
