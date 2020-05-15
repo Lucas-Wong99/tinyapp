@@ -1,12 +1,11 @@
 const getUserByEmail = (emailId, data) => {
   for (const user in data) {
     if (emailId === data[user].email) {
-      console.log(data[user])
       return user;
     }
   }
   return undefined;
-}
+};
 
 const urlsForUser = function(id, urls) {
   let results = {};
@@ -16,7 +15,7 @@ const urlsForUser = function(id, urls) {
     }   
   }
   return results;
-}
+};
 
 const generateRandomString = () => {
   let result = '';
@@ -32,4 +31,4 @@ module.exports = {
   getUserByEmail,
   urlsForUser,
   generateRandomString
-}
+};
