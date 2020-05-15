@@ -20,6 +20,7 @@ app.use(morgan("dev"));
 const urlDatabase = {};
 const users = {};
 
+//Renders the html form to create a new url
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id]
@@ -77,10 +78,11 @@ app.get("/login", (req, res) => {
   }
 });
 
+//Renders stored urlDatabase but calls an error if not logged in
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
-    res.send('User must be logged in to this site <a href="/login"> LOGIN </a>');
+    res.status(401).send('User must be logged in to this site <a href="/login"> LOGIN </a>');
   } else {
     let templateVars = {
       urls: urlsForUser(userID, urlDatabase),
