@@ -38,7 +38,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//Handles get request and renders HTML with templateVars
+//Handles get request and renders shortURL page with templateVars
 app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   if (userID === undefined || userID !== urlDatabase[req.params.shortURL].user_id) {
