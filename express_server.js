@@ -90,7 +90,7 @@ app.get("/urls", (req, res) => {
   }
 });
 
-app.get("*", (req, res) => {
+app.get("/", (req, res) => {
   const userID = req.session.user_id;
   if (userID) {
     res.redirect("/urls");
